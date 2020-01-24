@@ -1,8 +1,8 @@
 #!/bin/bash
 inputdims=(16)
-nbFixedPoints=(1 5)
+nbFixedPoints=(1 5 20 100)
 nbLayers=(2)
-hiddenDims=(1000)
+hiddenDims=(1000 10000 100000 500000 1000000)
 Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
 for inputDim in "${inputdims[@]}"
