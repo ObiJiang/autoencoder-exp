@@ -3,7 +3,7 @@ inputdims=(16)
 nbFixedPoints=(2)
 nbLayers=(2)
 hiddenDims=(1000)
-Dirs=('test')
+Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
 for inputDim in "${inputdims[@]}"
 do
