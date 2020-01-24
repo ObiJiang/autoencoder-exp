@@ -1,6 +1,6 @@
 #!/bin/bash
 inputdims=(16)
-nbFixedPoints=(5)
+nbFixedPoints=(2)
 nbLayers=(2)
 hiddenDims=(1000)
 Dirs=('test')
