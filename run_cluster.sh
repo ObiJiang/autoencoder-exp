@@ -21,7 +21,7 @@ for Dir in "${Dirs[@]}"
 do
 
 echo $inputDim, $nbFixedPoint, $nbLayer, $hiddenDim, $Dir, 0.1, 1, 10
-export inputDim nbFixedPoint nbLayer hiddenDim
+export inputDim nbFixedPoint nbLayer hiddenDim Dir
 
 sbatch -o out_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
 -e err_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
