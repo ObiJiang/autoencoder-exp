@@ -1,9 +1,8 @@
 #!/bin/bash
 inputdims=(1)
-nbFixedPoints=(1 5)
+nbFixedPoints=(1)
 nbLayers=(2)
-hiddenDims=(1000 10000)
-
+hiddenDims=(1000)
 
 for inputDim in "${inputdims[@]}"
 do
