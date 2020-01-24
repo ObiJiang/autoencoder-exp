@@ -1,9 +1,17 @@
 #!/bin/bash
-inputdims=(16)
-nbFixedPoints=(1, 5, 20, 100)
+# 2-layer expriments
+inputdims=(1)
+nbFixedPoints=(1 5)
 nbLayers=(2)
-hiddenDims=(1000, 10000, 100000, 500000, 1000000)
-Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
+hiddenDims=(1000 10000)
+# hiddenDims=(1000, 10000, 100000, 500000, 1000000)
+
+# 3-layer expriments
+# inputdims=(16)
+# nbFixedPoints=(1 5 20 100)
+# nbLayers=(3)
+# hiddenDims=(100 1000 10000)
+# Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
 for inputDim in "${inputdims[@]}"
 do
