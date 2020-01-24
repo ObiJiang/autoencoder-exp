@@ -15,7 +15,7 @@
 # Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
 # 2-layer change input dims
-inputdims=(8, 32)
+inputdims=(8 32)
 nbFixedPoints=(1 5 20 100)
 nbLayers=(2)
 hiddenDims=(1000 10000 100000 500000 1000000)
