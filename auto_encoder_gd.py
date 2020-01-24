@@ -483,7 +483,7 @@ if __name__ == '__main__':
   T = 100000
   M = 100
 
-  for constant in ([5]):
+  for constant in ([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 1]):
     for input_dim in ([args.input_dim]):
       for nb_fixed_point in ([args.nb_fixed_point]):
         all_x_list = []
