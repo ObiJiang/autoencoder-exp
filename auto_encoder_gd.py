@@ -40,7 +40,8 @@ class Multivariate_Jacobian_Network(nn.Module):
     self.device = device
     
   def act(self, x):
-    return torch.sigmoid(x) 
+    # return torch.sigmoid(x) 
+    return torch.tanh(x)
 
   def forward(self, x):
     constant = 1
@@ -521,5 +522,5 @@ if __name__ == '__main__':
               print(input_dim, constant, nb_fixed_point, nb_layer, hidden_dim, converged_T.mean(), init_losses.mean(), losses.mean(), kernel_diff.mean(), first.mean(), last.mean(), (last - first).mean(), first.std(), last.std(), (last - first).std(), 
               converged_mem_success[:,0].mean(), converged_mem_success[:,0].std(), converged_mem_success[:,1].mean(), converged_mem_success[:,1].std(), converged_mem_success[:,2].mean(), converged_mem_success[:,2].std())
               
-              filename = 'input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
+              filename = 'tanh_input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
               np.savez(args.dir + '/' +filename, first=first, last=last, init_losses=init_losses, losses = losses, kernel_diff = kernel_diff, converged_T = converged_T, converged_mem_success = converged_mem_success)

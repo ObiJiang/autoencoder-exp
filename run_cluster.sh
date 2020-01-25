@@ -7,19 +7,19 @@
 # hiddenDims=(1000 10000 100000 500000 1000000)
 # Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
-# 3-layer
-# inputdims=(16)
-# nbFixedPoints=(1 5 20 100)
-# nbLayers=(3)
-# hiddenDims=(100 1000 10000)
-# Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
+3-layer
+inputdims=(16)
+nbFixedPoints=(1 5 20 100)
+nbLayers=(3)
+hiddenDims=(100 1000 10000)
+Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder_tanh')
 
 # 2-layer change input dims
-inputdims=(8 32)
-nbFixedPoints=(1 5 20 100)
-nbLayers=(2)
-hiddenDims=(1000 10000 100000 500000 1000000)
-Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
+# inputdims=(8 32)
+# nbFixedPoints=(1 5 20 100)
+# nbLayers=(2)
+# hiddenDims=(1000 10000 100000 500000 1000000)
+# Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder')
 
 for inputDim in "${inputdims[@]}"
 do
