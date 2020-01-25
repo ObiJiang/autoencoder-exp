@@ -39,8 +39,8 @@ do
 echo $inputDim, $nbFixedPoint, $nbLayer, $hiddenDim, $Dir, 0.1, 1, 10
 export inputDim nbFixedPoint nbLayer hiddenDim Dir
 
-sbatch -o out_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
--e err_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
+sbatch -o out_tanh_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
+-e err_tanh_i${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim}.stdout.txt \
 --job-name=auto_encoder_ri${inputDim}_np${nbFixedPoint}_nl${nbLayer}_h${hiddenDim} \
 run_script.sbatch
 
