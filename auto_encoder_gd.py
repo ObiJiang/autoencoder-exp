@@ -20,11 +20,12 @@ import argparse
 import matplotlib.pyplot as plt
 
 class Multivariate_Jacobian_Network(nn.Module):
-  def __init__(self, input_dim, hidden_dim, nb_layer, host, device):
+  def __init__(self, input_dim, hidden_dim, nb_layer, act, host, device):
     super(Multivariate_Jacobian_Network, self).__init__()
     self.input_dim = input_dim
     self.hidden_dim = hidden_dim
     self.nb_layer = nb_layer
+    self.act_flag = act
 
     self.w_in = torch.nn.Parameter(torch.randn(input_dim, self.hidden_dim)  , requires_grad = True) 
 
@@ -40,7 +41,12 @@ class Multivariate_Jacobian_Network(nn.Module):
     self.device = device
     
   def act(self, x):
-    return torch.sigmoid(x) 
+    if self.act_flag == 'sigmoid':
+      return torch.sigmoid(x) 
+    if self.act_flag == 'tanh':
+      return torch.tanh(x)
+    if self.act_flag == 'erf':
+      return torch.erf(x)
 
   def forward(self, x):
     constant = 1
@@ -170,7 +176,7 @@ def kernel_mats(net, data, device, use_cuda = True):
   return retMat
 
 class Test():
-  def __init__(self, input_dim, hidden_dim):
+  def __init__(self, input_dim, hidden_dim, act):
     self.jacobian_compare = False
     self.hidden_feature_compare = False
     self.final_layer_weight_compare = False
@@ -183,6 +189,7 @@ class Test():
     self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     self.attactors = None
     self.model = None
+    self.act = act
     self.training_th = 1e-7
     self.ae_th = 1e-2
 
@@ -192,7 +199,7 @@ class Test():
     x_batch_tensor = torch.cat(x_list, axis=0).to(self.device)
     self.attactors = x_batch_tensor
 
-    model = Multivariate_Jacobian_Network(self.input_dim, self.hidden_dim, nb_layer, self.host, self.device).to(self.device)
+    model = Multivariate_Jacobian_Network(self.input_dim, self.hidden_dim, nb_layer, self.act, self.host, self.device).to(self.device)
     self.model = model
 
     criterion = torch.nn.MSELoss(reduction='sum')
@@ -475,11 +482,13 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--input_dim', type=int, default= 5, help='input dimension')
+  parser.add_argument('--input_dim', type=int, default= 128, help='input dimension')
   parser.add_argument('--nb_fixed_point', type=int, default= 2, help='number of fixed points')
 
   parser.add_argument('--nb_layer', type=int, default= 2, help='number of layers')
   parser.add_argument('--hidden_dim', type=int, default= 1000, help='hidden layers')
+
+  parser.add_argument('--act', type=str, default='sigmoid')
 
   parser.add_argument('--dir', type=str, default= "./test")
   
@@ -524,7 +533,7 @@ if __name__ == '__main__':
               
               for i in tqdm(range(M)):
                 x_list = all_x_list[i]
-                test = Test(input_dim, hidden_dim)
+                test = Test(input_dim, hidden_dim, args.act)
                 first[i, :], last[i, :], init_losses[i], losses[i], kernel_diff[i], converged_T[i], all_first[i,:,:,:], all_final[i,:,:,:], first_eig[i, :], last_eig[i, :]  = test.test(nb_layer, x_list, T, lr)
                 # test.test_jacobian_change()
                 # test.test_kernel()
@@ -535,5 +544,5 @@ if __name__ == '__main__':
               print(input_dim, constant, nb_fixed_point, nb_layer, hidden_dim, converged_T.mean(), init_losses.mean(), losses.mean(), kernel_diff.mean(), first.mean(), last.mean(), (last - first).mean(), first.std(), last.std(), (last - first).std(), 
               converged_mem_success[:,0].mean(), converged_mem_success[:,0].std(), converged_mem_success[:,1].mean(), converged_mem_success[:,1].std(), converged_mem_success[:,2].mean(), converged_mem_success[:,2].std())
               
-              filename = 'eig_input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
+              filename = args.act + '_eig_input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
               np.savez(args.dir + '/' +filename, first_eig=first_eig, last_eig=last_eig, all_first=all_first, all_final=all_final, first=first, last=last, init_losses=init_losses, losses = losses, kernel_diff = kernel_diff, converged_T = converged_T, converged_mem_success = converged_mem_success)
