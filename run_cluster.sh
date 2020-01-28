@@ -5,7 +5,7 @@ inputdims=(100)
 nbFixedPoints=(20 50 80)
 nbLayers=(2)
 hiddenDims=(1000)
-Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder_eig')
+Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder_eig_linear')
 Acts=('sigmoid' 'tanh')
 
 for inputDim in "${inputdims[@]}"
