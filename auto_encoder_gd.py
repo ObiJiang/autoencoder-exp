@@ -482,7 +482,7 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser()
 
-  parser.add_argument('--input_dim', type=int, default= 128, help='input dimension')
+  parser.add_argument('--input_dim', type=int, default= 100, help='input dimension')
   parser.add_argument('--nb_fixed_point', type=int, default= 2, help='number of fixed points')
 
   parser.add_argument('--nb_layer', type=int, default= 2, help='number of layers')
@@ -490,7 +490,7 @@ if __name__ == '__main__':
 
   parser.add_argument('--act', type=str, default='sigmoid')
 
-  parser.add_argument('--dir', type=str, default= "./test")
+  parser.add_argument('--dir', type=str, default= "./test_act_linear")
   
   args = parser.parse_args()
 
@@ -501,7 +501,7 @@ if __name__ == '__main__':
   T = 100000
   M = 100
 
-  for constant in ([5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 1]):
+  for constant in ([1]):
     for input_dim in ([args.input_dim]):
       for nb_fixed_point in ([args.nb_fixed_point]):
         all_x_list = []

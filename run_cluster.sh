@@ -2,11 +2,11 @@
 
 # large activation test
 inputdims=(100)
-nbFixedPoints=(50)
+nbFixedPoints=(20 50 80)
 nbLayers=(2)
-hiddenDims=(10000)
+hiddenDims=(1000)
 Dirs=('/n/scratchlfs02/pehlevan_lab/yibo_autoencoder_eig')
-Acts=('sigmoid' 'tanh' 'erf')
+Acts=('sigmoid' 'tanh')
 
 for inputDim in "${inputdims[@]}"
 do
