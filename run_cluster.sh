@@ -44,7 +44,7 @@ done
 done
 
 # 3-layer, single point test
-inputdims=(16, 32)
+inputdims=(8, 16, 32)
 nbFixedPoints=(1)
 nbLayers=(3, 4)
 hiddenDims=(100 1000 10000)
