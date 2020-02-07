@@ -485,12 +485,14 @@ if __name__ == '__main__':
   parser.add_argument('--input_dim', type=int, default= 100, help='input dimension')
   parser.add_argument('--nb_fixed_point', type=int, default= 2, help='number of fixed points')
 
+  parser.add_argument('--constant', type=int, default= 1, help='radius constant')
+
   parser.add_argument('--nb_layer', type=int, default= 2, help='number of layers')
   parser.add_argument('--hidden_dim', type=int, default= 1000, help='hidden layers')
 
-  parser.add_argument('--act', type=str, default='sigmoid')
+  parser.add_argument('--act', type=str, default='sigmoid',  help='activation functions chosen from: erf, tanh, sigmoid')
 
-  parser.add_argument('--dir', type=str, default= "./test_add_on")
+  parser.add_argument('--dir', type=str, default= "./test_add_on", help='directory to save experiment data')
   
   args = parser.parse_args()
 
@@ -501,7 +503,7 @@ if __name__ == '__main__':
   T = 100000
   M = 100
 
-  for constant in ([1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]):
+  for constant in ([args.constant]):
     for input_dim in ([args.input_dim]):
       for nb_fixed_point in ([args.nb_fixed_point]):
         all_x_list = []
@@ -524,7 +526,7 @@ if __name__ == '__main__':
               losses = np.zeros(M)
               kernel_diff = np.zeros(M)
               converged_T = np.zeros(M)
-              mem_radius_all = np.linspace(1, 100, 100)
+              mem_radius_all = np.linspace(1, 100, 10)
               converged_mem_success = np.zeros((M, mem_radius_all.shape[0]))
 
               first_eig = np.zeros((M, nb_fixed_point))
@@ -543,7 +545,7 @@ if __name__ == '__main__':
                   converged_mem_success[i, k] = test.memorize_test(radis=mem_radius) / nb_fixed_point
                 # test.finding_other_fixed_point(constant)
 
-              print(input_dim, constant, nb_fixed_point, nb_layer, hidden_dim, converged_T.mean(), init_losses.mean(), losses.mean(), kernel_diff.mean(), first.mean(), last.mean(), (last - first).mean(), first.std(), last.std(), (last - first).std())
+              print(input_dim, constant, nb_fixed_point, nb_layer, hidden_dim, converged_T.mean(), init_losses.mean(), losses.mean(), first.mean(), last.mean(), (last - first).mean())
               
               filename = args.act + '_eig_input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
               np.savez(args.dir + '/' +filename, first_eig=first_eig, last_eig=last_eig, all_first=all_first, all_final=all_final, first=first, last=last, init_losses=init_losses, losses = losses, kernel_diff = kernel_diff, converged_T = converged_T, converged_mem_success = converged_mem_success)
