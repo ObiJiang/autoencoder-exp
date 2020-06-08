@@ -8,7 +8,7 @@ Original file is located at
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-import torch 
+import torch
 import numpy
 from torch import nn
 from torch.autograd import Variable
@@ -27,22 +27,22 @@ class Multivariate_Jacobian_Network(nn.Module):
     self.nb_layer = nb_layer
     self.act_flag = act
 
-    self.w_in = torch.nn.Parameter(torch.randn(input_dim, self.hidden_dim)  , requires_grad = True) 
+    self.w_in = torch.nn.Parameter(torch.randn(input_dim, self.hidden_dim)  , requires_grad = True)
 
     self.w_list = nn.ParameterList([])
     if self.nb_layer > 2:
       for _ in range(self.nb_layer - 2):
-        prev_hidden_dim = self.hidden_dim 
-        self.w_list.append(torch.nn.Parameter(torch.randn(prev_hidden_dim, self.hidden_dim), requires_grad = True)) 
+        prev_hidden_dim = self.hidden_dim
+        self.w_list.append(torch.nn.Parameter(torch.randn(prev_hidden_dim, self.hidden_dim), requires_grad = True))
 
     self.w_out = torch.nn.Parameter(torch.randn(self.hidden_dim, input_dim) , requires_grad = True)
 
     self.host = host
     self.device = device
-    
+
   def act(self, x):
     if self.act_flag == 'sigmoid':
-      return torch.sigmoid(x) 
+      return torch.sigmoid(x)
     if self.act_flag == 'tanh':
       return torch.tanh(x)
     if self.act_flag == 'erf':
@@ -52,20 +52,20 @@ class Multivariate_Jacobian_Network(nn.Module):
     constant = 1
 
     x_w_grad = Variable(x.clone(), requires_grad = True)
-    self.hid = self.act(x_w_grad @ self.w_in / np.sqrt(self.input_dim) * constant) 
+    self.hid = self.act(x_w_grad @ self.w_in / np.sqrt(self.input_dim) * constant)
 
     for i,w in enumerate(self.w_list):
-      self.hid = self.act(self.hid @ w / np.sqrt(self.hidden_dim) * constant) 
+      self.hid = self.act(self.hid @ w / np.sqrt(self.hidden_dim) * constant)
 
-    y = (self.hid @ self.w_out / np.sqrt(self.hidden_dim) * constant) 
-    
+    y = (self.hid @ self.w_out / np.sqrt(self.hidden_dim) * constant)
+
     return y, x_w_grad
-  
+
   def forward_with_jacobian(self, x):
     y, x_w_grad = self.forward(x)
-    
+
     jac = self.compute_jacobian(y, x_w_grad)
-    
+
     return y, jac
 
   def compute_jacobian(self, y, x):
@@ -73,22 +73,22 @@ class Multivariate_Jacobian_Network(nn.Module):
     mini_batch_size = x.shape[0]
 
     dim = y.shape[1]
-    
+
     jacobian = torch.zeros(dim, mini_batch_size, dim, device=self.device)
     grad_one_hot = torch.zeros(mini_batch_size, dim, device=self.device)
-    
+
     for i in range(dim):
       grad_one_hot.zero_()
       grad_one_hot[:,i] = 1
       jacobian[i] = torch.autograd.grad(y, x, grad_one_hot, create_graph=True)[0]
-      
+
     return torch.transpose(jacobian, dim0 = 0, dim1 = 1)
 
   def forward_with_jacobian_with_weight(self, x, w):
     y, x_w_grad = self.forward(x)
-    
+
     jac = self.compute_jacobian_with_last_layer_weight(self.hid, x_w_grad, w)
-    
+
     return jac.clone().cpu().data.numpy()
 
   def compute_jacobian_with_last_layer_weight(self, y, x, w):
@@ -97,20 +97,20 @@ class Multivariate_Jacobian_Network(nn.Module):
     input_dim = x.shape[1]
 
     dim = y.shape[1]
-    
+
     pre_jacobian = torch.zeros(dim, mini_batch_size, input_dim)
     jacobian = torch.zeros(mini_batch_size, input_dim, input_dim)
     grad_one_hot = torch.zeros(mini_batch_size, dim)
-    
+
     for i in range(dim):
       grad_one_hot.zero_()
       grad_one_hot[:,i] = 1
       pre_jacobian[i] = torch.autograd.grad(y, x, grad_one_hot, create_graph=True)[0]
-      
+
     jacobian_without_last_layer = torch.transpose(pre_jacobian, dim0 = 0, dim1 = 1)
     for j in range(mini_batch_size):
       jacobian[j] = torch.Tensor(w).T @ jacobian_without_last_layer[j] / np.sqrt(self.hidden_dim)
-    
+
     return jacobian
 
   def real_jacobian(self, x):
@@ -118,11 +118,11 @@ class Multivariate_Jacobian_Network(nn.Module):
     mini_batch_size = x.shape[0]
     jacobian = torch.zeros(mini_batch_size, self.input_dim, self.input_dim)
     for i in range(mini_batch_size):
-      act_derivative = torch.sigmoid(x[i,:] @ self.w_in / np.sqrt(self.input_dim)) * (1 -  torch.sigmoid(x[i,:] @ self.w_in / np.sqrt(self.input_dim))).squeeze(0) 
+      act_derivative = torch.sigmoid(x[i,:] @ self.w_in / np.sqrt(self.input_dim)) * (1 -  torch.sigmoid(x[i,:] @ self.w_in / np.sqrt(self.input_dim))).squeeze(0)
       jacobian[i,:] = self.w_out.T @ (self.w_in * act_derivative).T / np.sqrt(self.hidden_dim) / np.sqrt(self.input_dim)
-    
+
     return jacobian
-  
+
   def real_jacobian_with_given_weights(self, x, w_in, w_out):
     assert(self.nb_layer == 2)
     w_in_tensor = torch.Tensor(w_in)
@@ -131,7 +131,7 @@ class Multivariate_Jacobian_Network(nn.Module):
     mini_batch_size = x.shape[0]
     jacobian = torch.zeros(mini_batch_size, self.input_dim, self.input_dim)
     for i in range(mini_batch_size):
-      act_derivative = torch.sigmoid(x[i,:] @ w_in_tensor / np.sqrt(self.input_dim)) * (1 -  torch.sigmoid(x[i,:] @ w_in_tensor / np.sqrt(self.input_dim))).squeeze(0) 
+      act_derivative = torch.sigmoid(x[i,:] @ w_in_tensor / np.sqrt(self.input_dim)) * (1 -  torch.sigmoid(x[i,:] @ w_in_tensor / np.sqrt(self.input_dim))).squeeze(0)
       jacobian[i,:] = w_out_tensor.T @ (w_in_tensor * act_derivative).T / np.sqrt(self.hidden_dim) / np.sqrt(self.input_dim)
 
     return jacobian
@@ -144,7 +144,7 @@ class Multivariate_Jacobian_Network(nn.Module):
     return w_in, w_out, act
 
 # function to calulcate kernel matrix
-def kernel_mats(net, data, device, use_cuda = True):
+def kernel_mats(net, data, device, use_cuda = False):
   nb_ptr = len(data)
   if use_cuda:
     net = net.cuda()
@@ -204,13 +204,13 @@ class Test():
 
     criterion = torch.nn.MSELoss(reduction='sum')
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-    
+
     init_jac = np.zeros(nb_fixed_point)
     init_jac_eigvals = np.zeros(nb_fixed_point)
     model.zero_grad()
     y_pred, jac = model.forward_with_jacobian(x_batch_tensor)
     self.w_in_0, self.w_out_0, self.act_0 = model.return_weights_acts()
-    
+
     np_jac = jac.clone().to(host).data.numpy()
     for i in range(nb_fixed_point):
       init_jac[i] = np.linalg.norm(np_jac[i], ord=2)
@@ -227,7 +227,7 @@ class Test():
       print(np.linalg.svd(np_jac)[0])
       print(np.linalg.svd(np_jac)[2])
       print(np.linalg.eig(np_jac)[1])
-    
+
     if self.landscape_compare:
         x_test = np.random.normal(size=(10, x_batch_tensor.shape[1])) * 1
         y_test_save = []
@@ -256,10 +256,10 @@ class Test():
       print(test_kernel[0])
 
     self.before_training_kernel = kernel_mats(model, x_list, self.device)
-    
+
     for t in (range(T)):
-          
-      all_loss = 0 
+
+      all_loss = 0
       optimizer.zero_grad()
       y_pred, x_grad = model(x_batch_tensor)
 
@@ -270,7 +270,7 @@ class Test():
 
       rec_loss = criterion(y_pred.view(-1), x_batch_tensor.view(-1)) / nb_fixed_point
       loss = rec_loss
-      
+
       loss.backward()
       optimizer.step()
       x_grad.grad.zero_()
@@ -279,11 +279,11 @@ class Test():
 
       if t == 0:
         init_loss = all_loss
-        
+
       if all_loss < self.training_th:
         break
-      
-    
+
+
     final_hid = model.hid.clone().to(host).data.numpy() / np.sqrt(self.hidden_dim)
 
     final_jac = np.zeros(nb_fixed_point)
@@ -291,7 +291,7 @@ class Test():
     model.zero_grad()
     y_pred, jac = model.forward_with_jacobian(x_batch_tensor)
     self.w_in_t, self.w_out_t, self.act_t = model.return_weights_acts()
-    
+
     np_jac = jac.clone().to(host).data.numpy()
     for i in range(nb_fixed_point):
       final_jac[i] = np.linalg.norm(np_jac[i], ord=2)
@@ -342,7 +342,7 @@ class Test():
         # first layer prediction
         input_feature_kernel = (x_batch_non_tensor/ np.sqrt(self.input_dim)  @ x_batch_non_tensor.T/ np.sqrt(self.input_dim) )
         predicted_weight_first_layer = (final_hid.T @ np.linalg.inv(input_feature_kernel) @ x_batch_non_tensor ).T * np.sqrt(self.hidden_dim) / np.sqrt(self.input_dim)
-        
+
         # print(predicted_weight_first_layer)
         # print(self.w_in_0)
         # print(self.w_in_t)
@@ -371,7 +371,7 @@ class Test():
         first_layer_jacobian = model.real_jacobian_with_given_weights(x_list[0], predicted_weight_first_layer, self.w_out_0)
         print("first_layer_prediction_jacobian: " + str(np.linalg.norm(first_layer_jacobian[0], ord=2)))
 
-      
+
     if self.weight_compare:
       print("output weight norm change: " + str(np.linalg.norm(self.w_out_t - self.w_out_0) /np.sqrt(self.hidden_dim) ))
       # print("weight prediction norm change: " + str(np.linalg.norm(self.w_out_t - predicted_weight) /np.sqrt(self.hidden_dim) ))
@@ -379,11 +379,11 @@ class Test():
       # print(np.linalg.norm(predicted_weight_first_layer))
       # print((self.w_out_0))
       # print(self.w_out_t)
-      
+
     after_training_kernel = kernel_mats(model, x_list, self.device)
     diff_kernel = np.linalg.norm(after_training_kernel - self.before_training_kernel)
     return init_jac, final_jac, init_loss, all_loss, diff_kernel, t, all_init_jac, all_final_jac, init_jac_eigvals, final_jac_eigvals
-  
+
   def test_jacobian_change(self):
     print("test jacobian change hidden dim " + str(self.hidden_dim) )
     w_in_0 = self.w_in_0
@@ -439,11 +439,11 @@ class Test():
       delta_w_out_z_norms[i] = np.linalg.norm(delta_w_out_z)
       delta_dev_z = delta_dev_jacobian @ z
       delta_dev_z_norms[i] = np.linalg.norm(delta_dev_z)
-      
+
     print(init_z_norms.mean(), final_z_norms.mean())
 
     print(delta_w_in_z_norms.mean(), delta_w_out_z_norms.mean(), delta_dev_z_norms.mean())
-  
+
   def test_kernel(self):
     print(self.before_training_kernel)
     print(np.linalg.eig(self.before_training_kernel))
@@ -459,11 +459,11 @@ class Test():
         if np.linalg.norm(diff) < self.ae_th:
           sucess += 1
           break
-    return sucess 
-      
+    return sucess
+
   def finding_other_fixed_point(self, constant):
       x = np.random.uniform(-constant, constant, size = (1, self.input_dim))
-      
+
       x_pretubed = torch.Tensor(x).to(self.device)
       print("start point:")
       print(x_pretubed.cpu().data.numpy())
@@ -473,7 +473,7 @@ class Test():
 
       print("converged point:")
       print(x_pretubed.cpu().data.numpy())
-      
+
       print("training points")
       for x_id, x in enumerate(self.attactors):
         print(x.cpu().data.numpy())
@@ -488,12 +488,12 @@ if __name__ == '__main__':
   parser.add_argument('--constant', type=int, default= 1, help='radius constant')
 
   parser.add_argument('--nb_layer', type=int, default= 2, help='number of layers')
-  parser.add_argument('--hidden_dim', type=int, default= 1000, help='hidden layers')
+  parser.add_argument('--hidden_dim', type=int, default= 10000, help='hidden layers')
 
   parser.add_argument('--act', type=str, default='sigmoid',  help='activation functions chosen from: erf, tanh, sigmoid')
 
   parser.add_argument('--dir', type=str, default= "./test_add_on", help='directory to save experiment data')
-  
+
   args = parser.parse_args()
 
   import os
@@ -503,15 +503,32 @@ if __name__ == '__main__':
   T = 100000
   M = 100
 
-  for constant in ([args.constant]):
+  from sklearn.datasets import fetch_openml
+  from sklearn.model_selection import train_test_split
+  X, y = fetch_openml('mnist_784', version=1, return_X_y=True)
+  X_train, _, _, _ = train_test_split(
+      X, y, train_size=5000, test_size=10000)
+
+  X_train /= 255
+  X_train -= X_train.mean(axis=0)
+
+  total_num = X_train.shape[0]
+
+  args.input_dim = X_train.shape[1]
+
+  for constant in ([10, 15, 20, 25, 30, 35, 40, 45, 50]):
     for input_dim in ([args.input_dim]):
       for nb_fixed_point in ([args.nb_fixed_point]):
         all_x_list = []
         for i in (range(M)):
           x_list = []
           x_numpy_list = []
-          for _ in range(nb_fixed_point):
-            a = np.random.normal(0, np.sqrt(input_dim), size = (1, input_dim))
+          for k in range(nb_fixed_point):
+            # a = np.random.normal(0, np.sqrt(input_dim), size = (1, input_dim))
+            # a_normalized = a/np.linalg.norm(a) * constant
+            # x_list.append(torch.Tensor(a_normalized))
+            selected = np.random.randint(low=0, high=total_num, size=1)
+            a = X_train[selected,:]
             a_normalized = a/np.linalg.norm(a) * constant
             x_list.append(torch.Tensor(a_normalized))
 
@@ -526,26 +543,27 @@ if __name__ == '__main__':
               losses = np.zeros(M)
               kernel_diff = np.zeros(M)
               converged_T = np.zeros(M)
-              mem_radius_all = np.linspace(1, 100, 10)
+              mem_radius_all = np.linspace(1, 100, 100)
+              print(mem_radius_all)
               converged_mem_success = np.zeros((M, mem_radius_all.shape[0]))
 
               first_eig = np.zeros((M, nb_fixed_point))
               last_eig = np.zeros((M, nb_fixed_point))
               all_first = np.zeros((M, nb_fixed_point, input_dim, input_dim))
               all_final = np.zeros((M, nb_fixed_point, input_dim, input_dim))
-              
+
               for i in tqdm(range(M)):
                 x_list = all_x_list[i]
                 test = Test(input_dim, hidden_dim, args.act)
                 first[i, :], last[i, :], init_losses[i], losses[i], kernel_diff[i], converged_T[i], all_first[i,:,:,:], all_final[i,:,:,:], first_eig[i, :], last_eig[i, :]  = test.test(nb_layer, x_list, T, lr)
                 # test.test_jacobian_change()
                 # test.test_kernel()
-                
+
                 for k, mem_radius in enumerate(mem_radius_all):
                   converged_mem_success[i, k] = test.memorize_test(radis=mem_radius) / nb_fixed_point
                 # test.finding_other_fixed_point(constant)
 
               print(input_dim, constant, nb_fixed_point, nb_layer, hidden_dim, converged_T.mean(), init_losses.mean(), losses.mean(), first.mean(), last.mean(), (last - first).mean())
-              
+
               filename = args.act + '_eig_input_dim' + str(input_dim) + '_constant' +str(constant) + '_np' + str(nb_fixed_point) + '_nl' + str(nb_layer) + '_h' + str(hidden_dim) + '.npz'
               np.savez(args.dir + '/' +filename, first_eig=first_eig, last_eig=last_eig, all_first=all_first, all_final=all_final, first=first, last=last, init_losses=init_losses, losses = losses, kernel_diff = kernel_diff, converged_T = converged_T, converged_mem_success = converged_mem_success)
